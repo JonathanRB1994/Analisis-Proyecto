@@ -10,7 +10,9 @@ Nombre: Jonathan Kevin Adalberto Rojas Bollat
 Carne: 201442841
 
 PROYECTO:
+
 RESOLUCIONES SAT
+
 -Facturacion               
 -Compra                
 -Venta                        
