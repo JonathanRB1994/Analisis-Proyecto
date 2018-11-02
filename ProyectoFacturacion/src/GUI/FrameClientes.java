@@ -29,6 +29,8 @@ public class FrameClientes extends javax.swing.JInternalFrame {
     private TextAutoCompleter autoNombre;
     private TextAutoCompleter autoApellidos;
     private TextAutoCompleter autoNIT;
+    
+    
     /**
      * Creates new form FrameClientes
      */

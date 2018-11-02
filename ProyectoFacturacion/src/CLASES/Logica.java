@@ -31,13 +31,28 @@ public class Logica {
         if (res != null) {
             try {  
                 while(res.next()){
-                    clientes.add(new Cliente(res.getInt("ID"), res.getString("NOMBRE"), res.getString("APELLIDOS"), res.getString("telefono"), res.getString("DIRECCION"), res.getString("EMAIL"), res.getString("NIT")));
+                    clientes.add(new Cliente(res.getInt("ID"), res.getString("NOMBRE"), res.getString("APELLIDOS"), res.getString("TELEFONO"), res.getString("DIRECCION"), res.getString("EMAIL"), res.getString("NIT")));
                 }                       
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return clientes;
+    }
+    
+    public ArrayList<Empleado> getListEmpleados(){    
+        ArrayList<Empleado> empleados = new ArrayList<Empleado>();               
+        ResultSet res =consultarDB("SELECT * FROM Empleado");                
+        if (res != null) {
+            try {  
+                while(res.next()){
+                    empleados.add(new Empleado(res.getInt("ID"), res.getString("NOMBRE"), res.getString("APELLIDOS"), res.getBoolean("ESTADO"), res.getString("CLAVE"), res.getString("EMAIL"), res.getString("TELEFONO"), res.getInt("ROL")));
+                }                       
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return empleados;
     }
     
     public ArrayList<Marca> getListMarca(){    
@@ -120,6 +135,40 @@ public class Logica {
                                     +condiciones);     
         }else{
             res= consultarDB("SELECT I.ID, P.NOMBRE, M.NOMBRE, PE.NOMBRE, U.NOMBRE, I.PRECIO, I.CANTIDAD FROM INVENTARIO I, PRODUCTO P, MARCA M, PRESENTACION PE, UNIDAD U WHERE I.PRODUCTO=P.ID AND I.MARCA=M.ID AND I.PRESENTACION=PE.ID AND I.UNIDAD=U.ID");     
+        }
+                
+        if (res != null) {
+            try {  
+                while(res.next()){
+                    Object [] fila = new Object[7];
+                    for (int i=0;i<7;i++){
+                        fila[i] = res.getObject(i+1);
+                    }               
+                    modelo.addRow(fila);
+                }                       
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return modelo;
+    }
+    
+    public DefaultTableModel getModelEmpleados(String condiciones){    
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("ID");
+        modelo.addColumn("ROL");
+        modelo.addColumn("NOMBRE");
+        modelo.addColumn("APELLIDOS");
+        modelo.addColumn("CLAVE");
+        modelo.addColumn("TELEFONO");
+        modelo.addColumn("EMAIL");
+                
+        ResultSet res;
+        if(condiciones!=null){
+            res= consultarDB("SELECT E.ID, R.NOMBRE, E.NOMBRE, E.APELLIDOS, E.CLAVE, E.TELEFONO, E.EMAIL FROM EMPLEADO E, ROL R WHERE E.ROL=R.ID "
+                                    +condiciones);     
+        }else{
+            res= consultarDB("SELECT E.ID, R.NOMBRE, E.NOMBRE, E.APELLIDOS, E.CLAVE, E.TELEFONO, E.EMAIL FROM EMPLEADO E, ROL R WHERE E.ROL=R.ID");     
         }
                 
         if (res != null) {
@@ -294,6 +343,10 @@ public class Logica {
         return ejecutarDB("UPDATE INVENTARIO SET ESTADO="+valor+" WHERE ID=\'"+id+"\'"); 
     }
     
+    public boolean changeStateEmpleado(String id, String valor){        
+        return ejecutarDB("UPDATE EMPLEADO SET ESTADO="+valor+" WHERE ID=\'"+id+"\'"); 
+    }
+    
     public boolean insertReg(String reg, String table){
         return ejecutarDB("INSERT INTO "+table+" ( NOMBRE) VALUES ( \'"+reg+"\' )");
     }
@@ -301,6 +354,11 @@ public class Logica {
     public boolean insertCliente(Cliente c){
         return ejecutarDB("INSERT INTO CLIENTE ( NOMBRE, APELLIDOS, TELEFONO, DIRECCION, NIT, EMAIL) VALUES ( \'"+c.getNombre()+"\', \'"+c.getApellidos()+"\', "
                 + "\'"+c.getTelefono()+"\', \'"+c.getDireccion()+"\', \'"+c.getNit()+"\', \'"+c.getEmail()+"\' )");
+    }
+    
+    public boolean insertEmpleado (Empleado e){
+        return ejecutarDB("INSERT INTO EMPLEADO ( NOMBRE, APELLIDOS, CLAVE, TELEFONO, EMAIL, ROL) VALUES ( \'"+e.getNombre()+"\', \'"+e.getApellidos()+"\', "
+                + "\'"+e.getClave()+"\', \'"+e.getTelefono()+"\', \'"+e.getEmail()+"\', \'"+e.getRol()+"\' )");
     }
     
     public boolean updateConfiguracion(Configuracion dbConfig){
