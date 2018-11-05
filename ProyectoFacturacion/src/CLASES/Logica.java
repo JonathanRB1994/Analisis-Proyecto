@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -24,6 +25,208 @@ public class Logica {
     private String database="FACTURACION_ANALISIS";
     private String user="root";
     private String password="";
+    
+    public boolean checkResolution(String tipo){
+        boolean resolucion=false;
+        ResultSet res =consultarDB("SELECT * FROM RESOLUCION WHERE ESTADO=1 AND TIPO=\'"+tipo+"\'");  
+        if (res != null) {
+            try {  
+                while(res.next()){
+                    resolucion = true;
+                    if(new Date().compareTo(res.getDate("FECHA_VENCIMIENTO"))>0){
+                        updateDownResolucion(res.getInt("ID"));                        
+                        return false;
+                    }
+                    if(res.getInt("NO_ACTUAL")>res.getInt("NO_FINAL")){
+                        updateDownResolucion(res.getInt("ID"));
+                        return false;
+                    }
+                }                       
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }                
+        return resolucion;
+    }
+    
+    public boolean venta(Empleado empleado, Cliente cliente, DefaultTableModel modelo, String tipo, double total){
+        try {
+            Resolucion resolucion=null;
+            
+            java.text.SimpleDateFormat formatoFecha = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            
+            Connection conn = getConexion();
+            conn.setAutoCommit(false);
+            Statement sentencia = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                        
+            //OBTENER RESOLUCION Y AUMENTAR CONTADOR
+            ResultSet res = sentencia.executeQuery("SELECT * FROM RESOLUCION WHERE ESTADO=1 AND TIPO=\'"+tipo+"\'");            
+            if (res != null){
+                while(res.next()){
+                    resolucion=new Resolucion(res.getInt("ID"), res.getString("TIPO"), res.getString("NO_RESOLUCION"), res.getString("NO_SERIE"), res.getInt("NO_INICIAL"),
+                            res.getInt("NO_FINAL"), res.getInt("NO_ACTUAL"), res.getBoolean("ESTADO"), res.getBoolean("CONTRIBUYENTE_CHICO"), res.getDate("FECHA_AUTORIZACION"), 
+                            res.getDate("FECHA_VENCIMIENTO"), res.getDate("FECHA_INGRESO"));
+                }
+                res.close();
+            }
+            if(resolucion==null){
+                return false;
+            }
+
+            //AUMENTAR CONTADOR RESOLUCION
+            sentencia.executeUpdate("UPDATE RESOLUCION SET NO_ACTUAL="+ (resolucion.getNoActual()+1) +" WHERE ID="+resolucion.getId() );
+
+            //GENERAR LA TRANASACCION                 
+            sentencia.executeUpdate("INSERT INTO TRANSACCION (RESOLUCION, CORRELATIVO, TOTAL, FECHA, ESTADO) VALUES"
+                    + "( \'"+resolucion.getId()+"\', "
+                    + "\'"+resolucion.getNoActual()+"\', "
+                    + "\'"+total+"\', "
+                    + "\'"+formatoFecha.format( new Date() )+"\', "
+                    + "\'EMITIDO\' )",
+                    Statement.RETURN_GENERATED_KEYS);
+            
+            ResultSet res5=null;
+            res5=sentencia.getGeneratedKeys();
+            res5.next();
+            int transaccionID=res5.getInt(1);
+            res5.close();
+            
+            //OBTENER CONFIGURACION
+            ResultSet res2 = sentencia.executeQuery("SELECT * FROM CONFIGURACION WHERE ID=1");  
+            Configuracion configuracion=null;
+            if (res2 != null){
+                while(res2.next()){
+                    configuracion = new Configuracion( res2.getInt("ID"), res2.getString("NOMBRE_COMERCIAL"), res2.getString("RAZON_SOCIAL"), res2.getString("DIRECCION"), res2.getString("NIT") );  
+                }
+                res2.close();
+            }            
+            if(configuracion==null){
+                return false;
+            }
+
+            //OBTENER RESOLUCION SISTEMA
+            ResultSet res3 = sentencia.executeQuery("SELECT * FROM RESOLUCION_SISTEMA WHERE ID=1");        
+            ResolucionSistema resolucionSistema=null;
+            if (res3 != null){
+                while(res3.next()){
+                    resolucionSistema=new ResolucionSistema( res3.getInt("ID"), res3.getString("NO_RESOLUCION"), res3.getDate("FECHA_AUTORIZACION"), res3.getInt("NO_MAQUINA") );
+                }
+                res3.close();
+            }                    
+            if(resolucionSistema==null){
+                return false;
+            }
+            
+            //GENERAR LA VENTA               
+            sentencia.executeUpdate("INSERT INTO VENTA (TRANSACCION, CLIENTE, NOMBRE_COMERCIAL, RAZON_SOCIAL, DIRECCION, NIT, EMPLEADO, RESOLUCION_SISTEMA) VALUES"
+                    + "( "+transaccionID+", "
+                    + cliente.getId()+", "
+                    + "\'"+configuracion.getNombreComercial()+"\', "
+                    + "\'"+configuracion.getRazonSocial()+"\', "
+                    + "\'"+configuracion.getDireccion()+"\', "
+                    + "\'"+configuracion.getNIT()+"\', "
+                    + empleado.getId()+", "
+                    + "\'"+resolucionSistema.getNoResolucion()+"\' )",
+                    Statement.RETURN_GENERATED_KEYS);
+            
+            ResultSet res6=null;
+            res6=sentencia.getGeneratedKeys();
+            res6.next();
+            int ventaID=res6.getInt(1);
+            res6.close();
+            
+            //GENERAR DETALLE VENTA        
+            for(int i=0; i<modelo.getRowCount(); i++){
+                sentencia.executeUpdate("INSERT INTO DETALLE_VENTA (VENTA, INVENTARIO, CANTIDAD, PRECIO, TOTAL) VALUES"
+                    + "( "+ventaID+", "
+                    + modelo.getValueAt(i, 0)+", "
+                    + modelo.getValueAt(i, 6)+", "
+                    + modelo.getValueAt(i, 5)+", "
+                    + modelo.getValueAt(i, 7)+" )");
+                
+                ResultSet res8 = sentencia.executeQuery("SELECT CANTIDAD FROM INVENTARIO WHERE ID="+modelo.getValueAt(i, 0));        
+                int cantidad =-1;
+                if (res8 != null){
+                    while(res8.next()){
+                        cantidad = res8.getInt("CANTIDAD");
+                    }
+                    res8.close();
+                }                    
+                if(cantidad==-1){
+                    return false;
+                }
+                cantidad-=(int) modelo.getValueAt(i, 6);
+                sentencia.executeUpdate("UPDATE INVENTARIO SET CANTIDAD="+cantidad+"  WHERE ID="+modelo.getValueAt(i, 0)+" ");
+            }
+                
+            sentencia.close();
+            conn.commit();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }        
+        return true;
+    }
+    
+    public boolean compra(Empleado empleado, DefaultTableModel modelo, double total, Proveedor proveedor){
+        try {
+            Resolucion resolucion=null;
+            
+            java.text.SimpleDateFormat formatoFecha = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            
+            Connection conn = getConexion();
+            conn.setAutoCommit(false);
+            Statement sentencia = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);                                    
+            
+            //GENERAR LA COMPRA              
+            sentencia.executeUpdate("INSERT INTO COMPRA (P_NOMBRE, P_NIT, TOTAL, EMPLEADO, FECHA) VALUES"
+                    + "( \'"+proveedor.getNombre()+"\', "
+                    + "\'"+proveedor.getNIT()+"\', "
+                    + total+", "
+                    + empleado.getId()+", "
+                    + "\'"+formatoFecha.format( new Date() )+"\') ",
+                    Statement.RETURN_GENERATED_KEYS);
+            
+            ResultSet res6=null;
+            res6=sentencia.getGeneratedKeys();
+            res6.next();
+            int compraID=res6.getInt(1);
+            res6.close();
+            
+            //GENERAR DETALLE COMPRA        
+            for(int i=0; i<modelo.getRowCount(); i++){
+                sentencia.executeUpdate("INSERT INTO DETALLE_COMPRA (COMPRA, INVENTARIO, CANTIDAD, PRECIO, TOTAL) VALUES"
+                    + "( "+compraID+", "
+                    + modelo.getValueAt(i, 0)+", "
+                    + modelo.getValueAt(i, 6)+", "
+                    + modelo.getValueAt(i, 5)+", "
+                    + modelo.getValueAt(i, 7)+" )");
+                
+                ResultSet res8 = sentencia.executeQuery("SELECT CANTIDAD FROM INVENTARIO WHERE ID="+modelo.getValueAt(i, 0));        
+                int cantidad =-1;
+                if (res8 != null){
+                    while(res8.next()){
+                        cantidad = res8.getInt("CANTIDAD");
+                    }
+                    res8.close();
+                }                    
+                if(cantidad==-1){
+                    return false;
+                }
+                cantidad+=(int) modelo.getValueAt(i, 6);
+                sentencia.executeUpdate("UPDATE INVENTARIO SET CANTIDAD="+cantidad+"  WHERE ID="+modelo.getValueAt(i, 0)+" ");
+            }
+                
+            sentencia.close();
+            conn.commit();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }        
+        return true;
+    }
     
     public ArrayList<Cliente> getListClientes(){    
         ArrayList<Cliente> clientes = new ArrayList<Cliente>();               
@@ -119,6 +322,24 @@ public class Logica {
         return productos;
     }
     
+    public ArrayList<Inventario> getListInventario(){    
+        ArrayList<Inventario> inventario = new ArrayList<Inventario>();        
+                
+        ResultSet res= consultarDB("SELECT I.ID, P.NOMBRE, M.NOMBRE, PE.NOMBRE, U.NOMBRE, I.PRECIO, I.CANTIDAD FROM INVENTARIO I, PRODUCTO P, MARCA M, PRESENTACION PE, UNIDAD U WHERE I.PRODUCTO=P.ID AND I.MARCA=M.ID AND I.PRESENTACION=PE.ID AND I.UNIDAD=U.ID AND ESTADO=1");     
+
+                
+        if (res != null) {
+            try {  
+                while(res.next()){
+                    inventario.add(new Inventario(res.getInt("I.ID"), res.getString("P.NOMBRE"), res.getString("M.NOMBRE"), res.getString("PE.NOMBRE"), res.getString("U.NOMBRE"), res.getInt("I.PRECIO"), res.getInt("I.CANTIDAD")));
+                }                       
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return inventario;
+    }
+    
     public DefaultTableModel getModelInventario(String condiciones){    
         DefaultTableModel modelo = new DefaultTableModel();
         modelo.addColumn("ID");
@@ -142,6 +363,43 @@ public class Logica {
                 while(res.next()){
                     Object [] fila = new Object[7];
                     for (int i=0;i<7;i++){
+                        fila[i] = res.getObject(i+1);
+                    }               
+                    modelo.addRow(fila);
+                }                       
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return modelo;
+    }
+    
+    public DefaultTableModel getModelTransaccion(String condiciones){    
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("ID");
+        modelo.addColumn("RESOLUCION");
+        modelo.addColumn("NO SERIE");
+        modelo.addColumn("TIPO");
+        modelo.addColumn("NO INICIAL");
+        modelo.addColumn("CORRELATIVO");        
+        modelo.addColumn("NO FINAL");
+        modelo.addColumn("TOTAL");
+        modelo.addColumn("FECHA");
+        modelo.addColumn("ESTADO");
+                
+        ResultSet res;
+        if(condiciones!=null){
+            res= consultarDB("SELECT T.ID, R.NO_RESOLUCION, R.NO_SERIE, R.TIPO, R.NO_INICIAL, T.CORRELATIVO, R.NO_FINAL, T.TOTAL, T.FECHA, T.ESTADO FROM TRANSACCION T, RESOLUCION R WHERE R.ID=T.RESOLUCION "
+                                    +condiciones);     
+        }else{
+            res= consultarDB("SELECT T.ID, R.NO_RESOLUCION, R.NO_SERIE, R.TIPO, R.NO_INICIAL, T.CORRELATIVO, R.NO_FINAL, T.TOTAL, T.FECHA, T.ESTADO FROM TRANSACCION T, RESOLUCION R WHERE R.ID=T.RESOLUCION ");     
+        }
+                
+        if (res != null) {
+            try {  
+                while(res.next()){
+                    Object [] fila = new Object[10];
+                    for (int i=0;i<10;i++){
                         fila[i] = res.getObject(i+1);
                     }               
                     modelo.addRow(fila);
@@ -232,14 +490,15 @@ public class Logica {
         modelo.addColumn("ESTADO");
         modelo.addColumn("PEQUEÑO");
         modelo.addColumn("AUTORIZACION");
+        modelo.addColumn("VENCIMIENTO");
         modelo.addColumn("INGRESO");
                 
         ResultSet res = consultarDB("SELECT * FROM RESOLUCION");     
         if (res != null) {
             try {  
                 while(res.next()){
-                    Object [] fila = new Object[11];
-                    for (int i=0;i<11;i++){
+                    Object [] fila = new Object[12];
+                    for (int i=0;i<12;i++){
                         fila[i] = res.getObject(i+1);
                     }               
                     modelo.addRow(fila);
@@ -309,9 +568,9 @@ public class Logica {
         
         
         java.text.SimpleDateFormat formatoFecha = new java.text.SimpleDateFormat("yyyy-MM-dd");        
-        return ejecutarDB("INSERT INTO RESOLUCION ( TIPO, NO_RESOLUCION, NO_SERIE, NO_INICIAL, NO_FINAL, NO_ACTUAL, ESTADO, CONTRIBUYENTE_CHICO, FECHA_AUTORIZACION, FECHA_INGRESO)"
+        return ejecutarDB("INSERT INTO RESOLUCION ( TIPO, NO_RESOLUCION, NO_SERIE, NO_INICIAL, NO_FINAL, NO_ACTUAL, ESTADO, CONTRIBUYENTE_CHICO, FECHA_AUTORIZACION, FECHA_VENCIMIENTO, FECHA_INGRESO)"
                 +" VALUES ( \'"+r.getTipo()+"\',  \'"+r.getNoResolucion()+"\', \'"+r.getNoSerie()+"\', "+r.getNoInicial()+", "+r.getNoFinal()+", "+r.getNoActual()+", "+r.isEstado()+","
-        +" "+r.isContribuyenteChico()+", \'"+formatoFecha.format( r.getFechaAutorizacion() )+"\', \'"+formatoFecha.format( r.getFechaIngreso() )+"\' )");
+        +" "+r.isContribuyenteChico()+", \'"+formatoFecha.format( r.getFechaAutorizacion() )+"\', \'"+formatoFecha.format( r.getFechaVencimiento())+"\', \'"+formatoFecha.format( r.getFechaIngreso() )+"\' )");
     }
     
     public boolean insertArticulo(Inventario i){
@@ -359,6 +618,10 @@ public class Logica {
     public boolean insertEmpleado (Empleado e){
         return ejecutarDB("INSERT INTO EMPLEADO ( NOMBRE, APELLIDOS, CLAVE, TELEFONO, EMAIL, ROL) VALUES ( \'"+e.getNombre()+"\', \'"+e.getApellidos()+"\', "
                 + "\'"+e.getClave()+"\', \'"+e.getTelefono()+"\', \'"+e.getEmail()+"\', \'"+e.getRol()+"\' )");
+    }
+    
+    public boolean updateDownResolucion(int id){
+        return ejecutarDB("UPDATE RESOLUCION SET ESTADO=0 WHERE ID="+id);
     }
     
     public boolean updateConfiguracion(Configuracion dbConfig){

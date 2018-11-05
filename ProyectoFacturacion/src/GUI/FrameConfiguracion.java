@@ -78,27 +78,37 @@ public class FrameConfiguracion extends javax.swing.JInternalFrame {
         jLabel2.setText("Nombre Comercial:");
 
         txNombreComercial.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txNombreComercial.setNextFocusableComponent(txRazonSocial);
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel3.setText("Razon Social:");
 
         txRazonSocial.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txRazonSocial.setNextFocusableComponent(txNIT);
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel4.setText("NIT:");
 
         txNIT.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txNIT.setNextFocusableComponent(txDireccion);
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel5.setText("Dirección:");
 
         txDireccion.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txDireccion.setNextFocusableComponent(btGuardarConf);
 
         btGuardarConf.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btGuardarConf.setText("Guardar");
+        btGuardarConf.setNextFocusableComponent(txResolucion);
         btGuardarConf.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btGuardarConfActionPerformed(evt);
+            }
+        });
+        btGuardarConf.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btGuardarConfKeyPressed(evt);
             }
         });
 
@@ -109,11 +119,17 @@ public class FrameConfiguracion extends javax.swing.JInternalFrame {
                 btGuardarResActionPerformed(evt);
             }
         });
+        btGuardarRes.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btGuardarResKeyPressed(evt);
+            }
+        });
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel6.setText("Fecha de Autorización:");
 
         txResolucion.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txResolucion.setNextFocusableComponent(txMaquina);
 
         jLabel7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel7.setText("Resolucion");
@@ -122,11 +138,13 @@ public class FrameConfiguracion extends javax.swing.JInternalFrame {
         jLabel11.setText("RESOLUCION DEL SISTEMA");
 
         dateSistema.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        dateSistema.setNextFocusableComponent(btGuardarRes);
 
         jLabel8.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel8.setText("No. de Maquina:");
 
         txMaquina.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        txMaquina.setNextFocusableComponent(dateSistema);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -273,6 +291,14 @@ public class FrameConfiguracion extends javax.swing.JInternalFrame {
             txMaquina.setText(dbResSystem.getNoMaquiena()+"");
         }
     }//GEN-LAST:event_btGuardarResActionPerformed
+
+    private void btGuardarConfKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btGuardarConfKeyPressed
+        btGuardarConf.doClick();
+    }//GEN-LAST:event_btGuardarConfKeyPressed
+
+    private void btGuardarResKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btGuardarResKeyPressed
+        btGuardarRes.doClick();
+    }//GEN-LAST:event_btGuardarResKeyPressed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -52,6 +52,8 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
         dateAutorizacion = new com.toedter.calendar.JDateChooser();
         jLabel1 = new javax.swing.JLabel();
         cbTipo = new javax.swing.JComboBox<>();
+        dateVencimiento = new com.toedter.calendar.JDateChooser();
+        jLabel17 = new javax.swing.JLabel();
 
         setClosable(true);
         setTitle("Nueva Resolucion");
@@ -101,6 +103,11 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
                 btGuardarActionPerformed(evt);
             }
         });
+        btGuardar.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                btGuardarKeyPressed(evt);
+            }
+        });
 
         dateAutorizacion.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
@@ -110,6 +117,11 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
         cbTipo.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         cbTipo.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "FACTURA", "NOTA DEBITO", "NOTA CREDITO" }));
 
+        dateVencimiento.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+
+        jLabel17.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jLabel17.setText("Fecha de Vencimiento:");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -118,33 +130,36 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(39, 39, 39)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(txResolucion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-                                .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(txSerie, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-                                .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(txInicial, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-                                .addComponent(txFinal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-                                .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel37, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(dateAutorizacion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(cbTipo, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(136, 136, 136)
-                        .addComponent(rbSi)
-                        .addGap(10, 10, 10)
-                        .addComponent(rbNo))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(88, 88, 88)
-                        .addComponent(btGuardar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txResolucion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                            .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txSerie, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                            .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txInicial, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                            .addComponent(txFinal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                            .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(dateAutorizacion, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbTipo, javax.swing.GroupLayout.Alignment.LEADING, 0, 300, Short.MAX_VALUE)
+                            .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(dateVencimiento, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 223, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(54, 54, 54)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel37)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(97, 97, 97)
+                                .addComponent(rbSi)
+                                .addGap(10, 10, 10)
+                                .addComponent(rbNo))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(49, 49, 49)
+                                .addComponent(btGuardar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addContainerGap(47, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -155,7 +170,7 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cbTipo, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
+                .addComponent(cbTipo, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel13)
                 .addGap(6, 6, 6)
@@ -176,7 +191,11 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
                 .addComponent(jLabel16)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(dateAutorizacion, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel17)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(dateVencimiento, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(14, 14, 14)
                 .addComponent(jLabel37)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -184,20 +203,25 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
                     .addComponent(rbNo))
                 .addGap(18, 18, 18)
                 .addComponent(btGuardar, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(76, 76, 76))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btGuardarActionPerformed
-        if( txResolucion.getText().equals("") || txSerie.getText().equals("") || txInicial.getText().equals("") || txInicial.getText().equals("") ){
+        if( txResolucion.getText().equals("") || txSerie.getText().equals("") || txInicial.getText().equals("") || txInicial.getText().equals("") || dateAutorizacion.getDate()==null || dateVencimiento.getDate()==null){
             JOptionPane.showMessageDialog(this, "Todos los campos de configuración son obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
-        if( new Date().compareTo(dateAutorizacion.getDate())!=1 ){
+        if( new Date().compareTo(dateAutorizacion.getDate())<0 ){
             JOptionPane.showMessageDialog(this, "La fecha de autorizacion es mayor a la de hoy.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if( dateVencimiento.getDate().compareTo(dateAutorizacion.getDate())<0 ){
+            JOptionPane.showMessageDialog(this, "La fecha de autorizacion es mayor a la de vencimiento.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
@@ -207,7 +231,7 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
         }
         
         if( logica.insertResolucion( new Resolucion( (String) cbTipo.getSelectedItem(), txResolucion.getText().toUpperCase(), txSerie.getText().toUpperCase(), Integer.valueOf(txInicial.getText()),
-                                                    Integer.valueOf(txFinal.getText()), rbSi.isSelected() , dateAutorizacion.getDate() ) ) ){
+                                                    Integer.valueOf(txFinal.getText()), rbSi.isSelected() , dateAutorizacion.getDate() , dateVencimiento.getDate()) ) ){
             JOptionPane.showMessageDialog(this, "Resolución agregada.", "Correcto", JOptionPane.PLAIN_MESSAGE);
             this.dispose();
         }else{
@@ -215,11 +239,16 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_btGuardarActionPerformed
 
+    private void btGuardarKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_btGuardarKeyPressed
+        btGuardar.doClick();
+    }//GEN-LAST:event_btGuardarKeyPressed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btGuardar;
     private javax.swing.JComboBox<String> cbTipo;
     private com.toedter.calendar.JDateChooser dateAutorizacion;
+    private com.toedter.calendar.JDateChooser dateVencimiento;
     private javax.swing.ButtonGroup groupContribuyente;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
@@ -228,6 +257,7 @@ public class FrameNuevaResolucion extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JRadioButton rbNo;
     private javax.swing.JRadioButton rbSi;

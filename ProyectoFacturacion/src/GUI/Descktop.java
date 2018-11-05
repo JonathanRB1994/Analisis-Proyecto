@@ -7,6 +7,7 @@ package GUI;
 
 import CLASES.Logica;
 import CLASES.Configuracion;
+import CLASES.Empleado;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -28,7 +29,7 @@ public class Descktop extends javax.swing.JFrame {
         
         logica=new Logica();
         
-        FrameOpcionesAdmin frame = new FrameOpcionesAdmin(logica);        
+        FrameOpcionesAdmin frame = new FrameOpcionesAdmin(logica, new Empleado(2, "JONATHAN", "ROJAS BOLLAT", true, "4321", "JONATHANRB1994@GMAIL.COM", "48366943", 2));        
         descktopPane.add(frame);
         Dimension pantalla = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension ventana = frame.getSize();

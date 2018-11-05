@@ -15,10 +15,10 @@ public class Inventario {
     private String marca;
     private String presentacion;
     private String unidad;
-    private int precio;
+    private double precio;
     private int cantidad;
 
-    public Inventario(String producto, String marca, String presentacion, String unidad, int precio) {
+    public Inventario(String producto, String marca, String presentacion, String unidad, double precio) {
         this.producto = producto;
         this.marca = marca;
         this.presentacion = presentacion;
@@ -26,7 +26,7 @@ public class Inventario {
         this.precio = precio;
     }
 
-    public Inventario(int id, String producto, String marca, String presentacion, String unidad, int precio, int cantidad) {
+    public Inventario(int id, String producto, String marca, String presentacion, String unidad, double precio, int cantidad) {
         this.id = id;
         this.producto = producto;
         this.marca = marca;
@@ -76,7 +76,7 @@ public class Inventario {
         this.unidad = unidad;
     }
 
-    public int getPrecio() {
+    public double getPrecio() {
         return precio;
     }
 

@@ -22,9 +22,10 @@ public class Resolucion {
     private boolean estado;
     private boolean contribuyenteChico;
     private Date fechaAutorizacion;
+    private Date fechaVencimiento;
     private Date fechaIngreso;
 
-    public Resolucion( int id, String tipo, String noResolucion, String noSerie, int noInicial, int noFinal, int noActual, boolean estado, boolean contribuyenteChico, Date fechaAutorizacion, Date fechaIngreso) {        
+    public Resolucion( int id, String tipo, String noResolucion, String noSerie, int noInicial, int noFinal, int noActual, boolean estado, boolean contribuyenteChico, Date fechaAutorizacion, Date fechaVencimiento, Date fechaIngreso) {        
         this.id = id;
         this.tipo = tipo;
         this.noResolucion = noResolucion;
@@ -35,16 +36,18 @@ public class Resolucion {
         this.estado = estado;
         this.contribuyenteChico = contribuyenteChico;
         this.fechaAutorizacion = fechaAutorizacion;
+        this.fechaVencimiento = fechaVencimiento;
         this.fechaIngreso = fechaIngreso;
     }
 
-    public Resolucion(String tipo, String noResolucion, String noSerie, int noInicial, int noFinal, boolean contribuyenteChico, Date fechaAutorizacion) {
+    public Resolucion(String tipo, String noResolucion, String noSerie, int noInicial, int noFinal, boolean contribuyenteChico, Date fechaAutorizacion, Date fechaVencimiento) {
         this.tipo = tipo;
         this.noResolucion = noResolucion;
         this.noSerie = noSerie;
         this.noInicial = noInicial;                
         this.noFinal = noFinal;
         this.contribuyenteChico = contribuyenteChico;
+        this.fechaVencimiento = fechaVencimiento;
         this.fechaAutorizacion = fechaAutorizacion;
         
         noActual=noInicial;
@@ -53,6 +56,14 @@ public class Resolucion {
         
     }
 
+    public Date getFechaVencimiento() {
+        return fechaVencimiento;
+    }
+
+    public void setFechaVencimiento(Date fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
+    }      
+    
     public boolean isEstado() {
         return estado;
     }
