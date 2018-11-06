@@ -38,6 +38,8 @@ public class FrameOpcionesAdmin extends javax.swing.JInternalFrame {
         if(!logica.checkResolution("NOTA CREDITO")){
             JOptionPane.showMessageDialog(this, "No cuenta con resoluciones de tipo NOTA CREDITO", "ERROR", JOptionPane.ERROR_MESSAGE);
         }
+        
+        
     }
 
     /**

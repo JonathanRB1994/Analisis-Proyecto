@@ -179,6 +179,11 @@ public class FrameCompra extends javax.swing.JInternalFrame {
         btCodigo.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         btCodigo.setText("=");
         btCodigo.setNextFocusableComponent(txProducto);
+        btCodigo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btCodigoActionPerformed(evt);
+            }
+        });
         btCodigo.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 btCodigoKeyPressed(evt);
@@ -407,6 +412,24 @@ public class FrameCompra extends javax.swing.JInternalFrame {
         }
         
     }//GEN-LAST:event_btGuardarActionPerformed
+
+    private void btCodigoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btCodigoActionPerformed
+        // Con caja de texto
+        int codigo = Integer.valueOf(JOptionPane.showInputDialog(this,"Código:", "CODIGO",JOptionPane.QUESTION_MESSAGE));
+        
+        for (int i = 0; i < inventario.size(); i++) {
+            if(inventario.get(i).getId()==codigo){
+                String valor=inventario.get(i).getProducto()+" "+inventario.get(i).getMarca()+" "+inventario.get(i).getPresentacion()+" "+inventario.get(i).getUnidad();
+                txProducto.setText(valor);
+                txCantidad.setText(1+"");
+                txPrecio.setText(inventario.get(i).getPrecio()+"");
+                index=i;
+                break;
+            }
+        }
+
+        
+    }//GEN-LAST:event_btCodigoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

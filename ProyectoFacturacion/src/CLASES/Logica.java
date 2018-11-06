@@ -1,14 +1,29 @@
 package CLASES;
 
 
+import GUI.Descktop;
+import br.com.adilson.util.Extenso;
+import br.com.adilson.util.PrinterMatrix;
 import com.mysql.jdbc.Connection;
+import java.awt.Desktop;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
-import javax.swing.JOptionPane;
+import javax.print.Doc;
+import javax.print.DocFlavor;
+import javax.print.DocPrintJob;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.SimpleDoc;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.table.DefaultTableModel;
 
 
@@ -25,6 +40,86 @@ public class Logica {
     private String database="FACTURACION_ANALISIS";
     private String user="root";
     private String password="";
+    
+    public String cortadorNombreProducto(String s) {
+
+        int cuantoLeDeboRellenar = 0;
+        String nuevoString = "";
+        String espacio = " ";
+        if (s.length() > 20) {
+            return s.substring(0, 19);
+        } else {
+            cuantoLeDeboRellenar = 19 - s.length();
+            nuevoString = s;
+            for (int i = 0; i <= cuantoLeDeboRellenar; i++) {
+                nuevoString = nuevoString.concat(espacio);
+            }
+            return nuevoString;
+        }
+    }
+
+    public int centrarLabels(int longitudLabel) {
+
+        int posicionCentral = 40 - longitudLabel;
+        if (posicionCentral == 0) {
+            return 0;
+        } else {
+            int division = posicionCentral / 2;
+            return division;
+        }
+    }
+
+    public void imprimirFactura(DefaultTableModel modelo, Resolucion res, Venta venta, Transaccion t, Cliente c) throws IOException {
+
+        PrinterMatrix printer = new PrinterMatrix();
+        int numeroLineas = (modelo.getRowCount() * 2) + 52;
+        int espaciosRecorridosDetalleVenta = 0;
+
+        printer.setOutSize(numeroLineas, 40);
+
+        printer.printTextLinCol(3, 4 + centrarLabels((venta.getNombreComercial()).length()), venta.getNombreComercial());
+        printer.printTextLinCol(5, 12, venta.getRazonSocial());
+        printer.printTextLinCol(7, 2 + centrarLabels((venta.getDireccion()).length()), venta.getDireccion());
+
+        printer.printTextLinCol(11, 4 + centrarLabels((venta.getNit()).length() + 5), "Nit: " + venta.getNit());
+        printer.printTextLinCol(13, 6 + centrarLabels((res.getNoResolucion()).length() + (res.getFechaAutorizacion()+"").length() + 11), "Resolucion " + res.getNoResolucion() + " del " + res.getFechaAutorizacion());
+        printer.printTextLinCol(15, 7 + centrarLabels((res.getNoSerie()).length() + (res.getNoInicial()+"").length() + (res.getNoFinal()+"").length() + 14), "Serie " + res.getNoSerie() + " de " + res.getNoInicial() + " al " + res.getNoFinal());
+        printer.printTextLinCol(17, 4 + centrarLabels(18), "Resolucion Sistema");
+        printer.printTextLinCol(19, 8 + centrarLabels((venta.getResolucionSistema()).length() + (venta.getFechaResolucion()+"").length() + 9), "Res. " +venta.getResolucionSistema()+ " de " + venta.getFechaResolucion());
+
+        printer.printTextLinCol(23, 4, "FACTURA SERIE " + res.getNoSerie());
+        printer.printTextLinCol(23, 23, "No. ");
+        printer.printTextLinCol(23, 35, res.getNoActual()+"");
+
+        printer.printTextLinCol(25, 4, "FECHA DE EMISION:");
+        printer.printTextLinCol(25, 21, t.getFecha()+"");
+        printer.printTextLinCol(27, 4, "COMPUTADORA No.   " + venta.getNoMaquina());
+        printer.printTextLinCol(29, 4, "TRANSACCION:    " + t.getId());
+
+        printer.printTextLinCol(32, 4, "Nombre:     " + c.getNombre());
+        printer.printTextLinCol(34, 4, "Nit:               " + c.getNit());
+        printer.printTextLinCol(36, 4, "Direccion:  " + c.getDireccion());
+
+        printer.printTextLinCol(40, 8, "Producto                               Cant.          Precio          Subtotal");
+
+        for (int i = 0; i < modelo.getRowCount(); i++) {
+            espaciosRecorridosDetalleVenta = espaciosRecorridosDetalleVenta + 2;
+            printer.printTextLinCol(40 + espaciosRecorridosDetalleVenta, 35, modelo.getValueAt(i, 1).toString());
+            printer.printTextLinCol(40 + espaciosRecorridosDetalleVenta, 29, modelo.getValueAt(i, 6).toString());
+            printer.printTextLinCol(40 + espaciosRecorridosDetalleVenta, 23, modelo.getValueAt(i, 5).toString());
+            printer.printTextLinCol(40 + espaciosRecorridosDetalleVenta, 4, cortadorNombreProducto(modelo.getValueAt(i, 7).toString()));
+        }
+
+        printer.printTextLinCol(44 + espaciosRecorridosDetalleVenta, 10, "TOTAL                                                Q." + t.getTotal());
+        printer.printTextLinCol(48 + espaciosRecorridosDetalleVenta, 6, "                           Sujeto a pago trimestrales");
+        printer.printTextLinCol(50 + espaciosRecorridosDetalleVenta, 6, "                        GRACIAS POR PREFERIRNOS ");
+
+        printer.toImageFile("factura.jpg");
+        String path2 = System.getProperty("user.dir");
+        File fileToPrint = new File(path2 + "\\factura.jpg");
+        
+        Desktop.getDesktop().print(fileToPrint);
+    }
     
     public boolean checkResolution(String tipo){
         boolean resolucion=false;
